@@ -20,6 +20,7 @@ import math
 import os
 import random
 import shutil
+import json
 from pathlib import Path
 
 import datasets
@@ -53,11 +54,13 @@ check_min_version("0.20.0.dev0")
 logger = get_logger(__name__, log_level="INFO")
 
 
-def save_model_card(repo_id: str, images=None, base_model=str, dataset_name=str, repo_folder=None):
+def save_model_card(repo_id: str, images=None, base_model=str, dataset_name=str, repo_folder=None, args=None):
     img_str = ""
     for i, image in enumerate(images):
         image.save(os.path.join(repo_folder, f"image_{i}.png"))
         img_str += f"![img_{i}](./image_{i}.png)\n"
+
+    training_args_string = json.dumps(vars(args), indent=2) if args else "Not specified"
 
     yaml = f"""
 ---
@@ -75,7 +78,12 @@ inference: true
     model_card = f"""
 # LoRA text2image fine-tuning - {repo_id}
 These are LoRA adaption weights for {base_model}. The weights were fine-tuned on the {dataset_name} dataset. You can find some example images in the following. \n
-{img_str}
+{img_str}\n
+
+## Training Args
+```json
+{training_args_string}
+```
 """
     with open(os.path.join(repo_folder, "README.md"), "w") as f:
         f.write(yaml + model_card)
@@ -911,6 +919,7 @@ def main():
                 base_model=args.pretrained_model_name_or_path,
                 dataset_name=args.dataset_name,
                 repo_folder=args.output_dir,
+                args=args
             )
             upload_folder(
                 repo_id=repo_id,
