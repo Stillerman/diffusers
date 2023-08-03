@@ -349,6 +349,12 @@ def parse_args():
         default=4,
         help=("The dimension of the LoRA update matrices."),
     )
+    parser.add_argument(
+        "--override-caption",
+        type=str,
+        default=None,
+        help=("Override the caption column with the provided string."),
+    )
 
     args = parser.parse_args()
     env_local_rank = int(os.environ.get("LOCAL_RANK", -1))
@@ -598,9 +604,14 @@ def main():
     # Preprocessing the datasets.
     # We need to tokenize input captions and transform the images.
     def tokenize_captions(examples, is_train=True):
+        if args.override_caption is not None:
+            print("Overriding all captions with " + args.override_caption)
+
         captions = []
         for caption in examples[caption_column]:
-            if isinstance(caption, str):
+            if args.override_caption is not None:
+                captions.append(args.override_caption)
+            elif isinstance(caption, str):
                 captions.append(caption)
             elif isinstance(caption, (list, np.ndarray)):
                 # take a random caption if there are multiple
@@ -946,4 +957,5 @@ def main():
 
 
 if __name__ == "__main__":
+    print("This is Stillerman's fork of diffusers.")
     main()
