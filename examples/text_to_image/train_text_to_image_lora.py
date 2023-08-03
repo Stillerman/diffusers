@@ -358,7 +358,7 @@ def parse_args():
         help=("The dimension of the LoRA update matrices."),
     )
     parser.add_argument(
-        "--override-caption",
+        "--override_caption",
         type=str,
         default=None,
         help=("Override the caption column with the provided string."),
