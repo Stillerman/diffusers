@@ -363,6 +363,12 @@ def parse_args():
         default=None,
         help=("Override the caption column with the provided string."),
     )
+    parser.add_argument(
+        "--append_caption",
+        type=str,
+        default=None,
+        help=("Add a string to the beginning of the caption column"),
+    )
 
     args = parser.parse_args()
     env_local_rank = int(os.environ.get("LOCAL_RANK", -1))
@@ -628,6 +634,11 @@ def main():
                 raise ValueError(
                     f"Caption column `{caption_column}` should contain either strings or lists of strings."
                 )
+            
+        if args.append_caption is not None:
+            print("Appending all captions with " + args.append_caption)
+            captions = [args.append_caption + caption for caption in captions]
+
         inputs = tokenizer(
             captions, max_length=tokenizer.model_max_length, padding="max_length", truncation=True, return_tensors="pt"
         )
